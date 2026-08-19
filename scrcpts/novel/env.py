@@ -11,9 +11,13 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 
-SOURCE_DIR = PROJECT_ROOT / "sources"
-OUTPUT_DIR = PROJECT_ROOT / "temps"
-BUILD_DIR = PROJECT_ROOT / "outputs"
+# 源结构: sources/novel/<书名>/正文.txt + 封面.<ext>
+SOURCE_DIR = PROJECT_ROOT / "sources" / "novel"
+TXT_FILE_NAME = "正文.txt"
+COVER_FILE_STEM = "封面"
+
+OUTPUT_DIR = PROJECT_ROOT / "temps" / "novel"
+BUILD_DIR = PROJECT_ROOT / "outputs" / "novel"
 TEMPLATE_DIR = PROJECT_ROOT / "templates" / "EPUB33-NOVEL"
 
 COVER_EXTENSIONS = (".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp")

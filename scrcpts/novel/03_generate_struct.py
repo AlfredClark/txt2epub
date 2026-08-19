@@ -23,6 +23,7 @@ from env import (
     CHAPTER_NUMBER_FORMAT,
     CHAPTER_TITLE_TEMPLATE,
     COVER_EXTENSIONS,
+    COVER_FILE_STEM,
     COVER_MEDIA_TYPES,
     OUTPUT_DIR,
     SHOW_INDEX,
@@ -74,7 +75,7 @@ def render_text(template: str, values: dict[str, str]) -> str:
 
 def find_cover(book_name: str) -> tuple[str, str, Path] | None:
     for ext in COVER_EXTENSIONS:
-        cover = SOURCE_DIR / f"{book_name}{ext}"
+        cover = SOURCE_DIR / book_name / f"{COVER_FILE_STEM}{ext}"
         if cover.exists():
             return f"cover{ext}", COVER_MEDIA_TYPES[ext], cover
     return None

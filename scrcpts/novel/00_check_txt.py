@@ -13,7 +13,7 @@ from pathlib import Path
 
 import cn2an
 
-from env import BOOKS, SOURCE_DIR
+from env import BOOKS, SOURCE_DIR, TXT_FILE_NAME
 
 _NUMBER = r"[0-9０-９一二三四五六七八九十百千零〇]+"
 
@@ -132,7 +132,7 @@ def _check_sequence(title: str, orders: list[int]) -> list[str]:
 
 def check_book(book_name: str) -> list[str]:
     lines: list[str] = []
-    src = SOURCE_DIR / f"{book_name}.txt"
+    src = SOURCE_DIR / book_name / TXT_FILE_NAME
 
     if not src.exists():
         return [f"  [ERROR] 文件不存在: {src}"]

@@ -13,7 +13,7 @@ from pathlib import Path
 
 import cn2an
 
-from env import BOOKS, OUTPUT_DIR, SOURCE_DIR
+from env import BOOKS, OUTPUT_DIR, SOURCE_DIR, TXT_FILE_NAME
 
 _NUMBER = r"[0-9０-９一二三四五六七八九十百千零〇]+"
 
@@ -146,7 +146,7 @@ def parse_txt(path: Path) -> dict:
 def main():
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     for book_name in BOOKS:
-        src = SOURCE_DIR / f"{book_name}.txt"
+        src = SOURCE_DIR / book_name / TXT_FILE_NAME
         if not src.exists():
             print(f"[SKIP] 未找到源文件: {src}")
             continue
