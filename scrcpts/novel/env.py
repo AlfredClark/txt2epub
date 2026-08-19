@@ -9,12 +9,12 @@
 """
 from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 
 SOURCE_DIR = PROJECT_ROOT / "sources"
 OUTPUT_DIR = PROJECT_ROOT / "temps"
 BUILD_DIR = PROJECT_ROOT / "outputs"
-TEMPLATE_DIR = PROJECT_ROOT / "templates" / "EPUB33"
+TEMPLATE_DIR = PROJECT_ROOT / "templates" / "EPUB33-NOVEL"
 
 COVER_EXTENSIONS = (".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp")
 COVER_MEDIA_TYPES = {

@@ -28,16 +28,17 @@ uv pip install cn2an --python .venv/bin/python
 ```
 txt2epub/
 ├── scrcpts/                     # 流水线脚本与配置
-│   ├── env.py                   # 全局配置（书名、路径、清理规则、编号格式）
-│   ├── 00_check_txt.py          # 1. 校验源 TXT 格式
-│   ├── 01_split_txt_to_json.py  # 2. TXT → JSON
-│   ├── 02_clean_json.py         # 3. 清理广告 / 作者注
-│   ├── 03_generate_struct.py    # 4. 生成 EPUB 目录结构
-│   └── 04_build_epub.py         # 5. 打包 .epub 并 epubcheck 校验
+│   └── novel/                   # 小说转换脚本
+│       ├── env.py               # 全局配置（书名、路径、清理规则、编号格式）
+│       ├── 00_check_txt.py      # 1. 校验源 TXT 格式
+│       ├── 01_split_txt_to_json.py  # 2. TXT → JSON
+│       ├── 02_clean_json.py     # 3. 清理广告 / 作者注
+│       ├── 03_generate_struct.py    # 4. 生成 EPUB 目录结构
+│       └── 04_build_epub.py     # 5. 打包 .epub 并 epubcheck 校验
 ├── sources/                     # 源 TXT 与同名封面图（如《书名》.txt / .jpg）
 ├── temps/                       # 中间 JSON（脚本自动生成，已忽略）
 ├── outputs/                     # 生成的 EPUB 目录结构与 .epub 产物（已忽略）
-├── templates/EPUB33/            # EPUB3 模板
+├── templates/EPUB33-NOVEL/      # EPUB3 小说模板
 │   ├── mimetype
 │   ├── META-INF/container.xml
 │   └── EPUB/
@@ -82,35 +83,35 @@ TXT 需满足以下结构（`00` 步会逐项校验）：
 
 ```bash
 # 1. 校验源 TXT 格式（属性齐全、简介/正文非空、章节/卷编号连续）
-uv run python scrcpts/00_check_txt.py
+uv run python scrcpts/novel/00_check_txt.py
 
 # 2. 按 env.BOOKS 逐书解析，生成 temps/书名.json
-uv run python scrcpts/01_split_txt_to_json.py
+uv run python scrcpts/novel/01_split_txt_to_json.py
 
 # 3. 清理广告与作者注（按 env 中的规则，原位覆写）
-uv run python scrcpts/02_clean_json.py
+uv run python scrcpts/novel/02_clean_json.py
 
-# 4. 基于 EPUB33 模板生成 outputs/书名/ 目录结构
-uv run python scrcpts/03_generate_struct.py
+# 4. 基于 EPUB33-NOVEL 模板生成 outputs/书名/ 目录结构
+uv run python scrcpts/novel/03_generate_struct.py
 
 # 5. 打包为 outputs/书名.epub 并调用 epubcheck 校验
-uv run python scrcpts/04_build_epub.py
+uv run python scrcpts/novel/04_build_epub.py
 ```
 
 各步说明：
 
 | 步骤 | 脚本 | 输入 → 输出 | 说明 |
 | --- | --- | --- | --- |
-| 00 | `00_check_txt.py` | `sources/` → 校验报告 | 检查属性齐全、简介/正文非空、书名一致性、章节/卷编号是否连续（分卷按卷分别校验）；任一错误该书 FAIL，全部通过 exit 0 |
-| 01 | `01_split_txt_to_json.py` | `sources/*.txt` → `temps/*.json` | 解析元数据、简介与章节/分卷结构，章节与卷按编号排序 |
-| 02 | `02_clean_json.py` | `temps/*.json` → `temps/*.json` | 按 `env` 清理规则删除整行广告、剥离行内 PS 注记，输出删除/剥离明细 |
-| 03 | `03_generate_struct.py` | `temps/*.json` → `outputs/*/` | 渲染封面、扉页、目录、分卷页、章节页，注入 manifest / spine |
-| 04 | `04_build_epub.py` | `outputs/*/` → `outputs/*.epub` | mimetype 置首且不压缩，其余 DEFLATE；epubcheck 有 ERROR 则 FAIL |
+| 00 | `novel/00_check_txt.py` | `sources/` → 校验报告 | 检查属性齐全、简介/正文非空、书名一致性、章节/卷编号是否连续（分卷按卷分别校验）；任一错误该书 FAIL，全部通过 exit 0 |
+| 01 | `novel/01_split_txt_to_json.py` | `sources/*.txt` → `temps/*.json` | 解析元数据、简介与章节/分卷结构，章节与卷按编号排序 |
+| 02 | `novel/02_clean_json.py` | `temps/*.json` → `temps/*.json` | 按 `env` 清理规则删除整行广告、剥离行内 PS 注记，输出删除/剥离明细 |
+| 03 | `novel/03_generate_struct.py` | `temps/*.json` → `outputs/*/` | 渲染封面、扉页、目录、分卷页、章节页，注入 manifest / spine |
+| 04 | `novel/04_build_epub.py` | `outputs/*/` → `outputs/*.epub` | mimetype 置首且不压缩，其余 DEFLATE；epubcheck 有 ERROR 则 FAIL |
 
-## 配置说明（`scrcpts/env.py`）
+## 配置说明（`scrcpts/novel/env.py`）
 
 - `BOOKS`：书名清单，脚本依此在 `sources/` 查找同名 `.txt`
-- 路径常量：`SOURCE_DIR` / `OUTPUT_DIR`(temps) / `BUILD_DIR`(outputs) / `TEMPLATE_DIR`(EPUB33)
+- 路径常量：`SOURCE_DIR` / `OUTPUT_DIR`(temps) / `BUILD_DIR`(outputs) / `TEMPLATE_DIR`(EPUB33-NOVEL)
 - `DROP_LINE_PATTERNS` / `STRIP_PATTERNS`：广告清理规则（正则），`DROP` 整行删除、`STRIP` 剥离行内子串
 - 编号格式（章节 / 卷独立配置）：
   - `arabic`：阿拉伯数字（1、2、3…）
