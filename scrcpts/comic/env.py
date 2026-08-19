@@ -29,23 +29,16 @@ IMAGE_MEDIA_TYPES = {
     ".bmp": "image/bmp",
 }
 
-# 漫画清单与元数据（直接在 env 中输入）
+# 漫画清单与元数据（演示样例，替换为实际漫画信息
 # name: 书名，对应 sources/comic/name/ 目录
 # author / tags / description: 元数据（为空时 00 步会 WARNING 提示）
 # cover: 可选，书名目录内的封面文件名（如 "001.jpg"）；缺省自动探测 cover.*
 COMICS = [
     {
-        "name": "思い出",
-        "author": "トウケツ",
-        "tags": ["NTR"],
-        "description": ["思い出"],
-        "cover": "001.jpg",
-    },
-    {
-        "name": "思い出は汚される",
-        "author": "トウケツ",
-        "tags": ["NTR", "胁迫"],
-        "description": ["思い出は汚される"],
+        "name": "书名示例",
+        "author": "作者示例",
+        "tags": ["标签一", "标签二"],
+        "description": ["简介第一行", "简介第二行"],
         "cover": "",
     },
 ]
