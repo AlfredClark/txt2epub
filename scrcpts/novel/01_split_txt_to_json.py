@@ -13,7 +13,7 @@ from pathlib import Path
 
 import cn2an
 
-from env import BOOKS, OUTPUT_DIR, SOURCE_DIR, TXT_FILE_NAME
+from env import BOOKS, OUTPUT_DIR, RENUMBER_CHAPTERS, SOURCE_DIR, TXT_FILE_NAME, VOLUME_RESTART_CHAPTERS
 
 _NUMBER = r"[0-9０-９一二三四五六七八九十百千零〇]+"
 
@@ -58,7 +58,7 @@ def extract_volume_title(header: str) -> str:
     return VOLUME_PREFIX_RE.sub("", header).strip() or header.strip()
 
 
-def parse_txt(path: Path) -> dict:
+def parse_txt(path: Path) -> tuple[dict, bool]:
     lines = path.read_text(encoding="utf-8-sig").splitlines()
 
     book_name = ""
@@ -130,9 +130,29 @@ def parse_txt(path: Path) -> dict:
     if not volumes and body_lines:
         volumes.append({"order": 0, "title": book_name, "chapters": []})
 
-    for volume in volumes:
-        volume["chapters"].sort(key=lambda chapter: chapter["order"])
     volumes.sort(key=lambda vol: vol["order"])
+
+    renumbered = False
+    if RENUMBER_CHAPTERS:
+        if VOLUME_RESTART_CHAPTERS:
+            for volume in volumes:
+                original = [chapter["order"] for chapter in volume["chapters"]]
+                for i, chapter in enumerate(volume["chapters"], start=1):
+                    chapter["order"] = i
+                if original != list(range(1, len(original) + 1)):
+                    renumbered = True
+        else:
+            original = [chapter["order"] for volume in volumes for chapter in volume["chapters"]]
+            counter = 1
+            for volume in volumes:
+                for chapter in volume["chapters"]:
+                    chapter["order"] = counter
+                    counter += 1
+            if original != list(range(1, counter)):
+                renumbered = True
+    else:
+        for volume in volumes:
+            volume["chapters"].sort(key=lambda chapter: chapter["order"])
 
     return {
         "title": book_name,
@@ -140,7 +160,7 @@ def parse_txt(path: Path) -> dict:
         "tags": tags.split("/"),
         "description": [line.strip() for line in intro_lines if line.strip()],
         "volumes": volumes,
-    }
+    }, renumbered
 
 
 def main():
@@ -150,9 +170,11 @@ def main():
         if not src.exists():
             print(f"[SKIP] 未找到源文件: {src}")
             continue
-        data = parse_txt(src)
+        data, renumbered = parse_txt(src)
         if data["title"] != book_name:
             print(f"[WARN] 源文件书名({data['title']})与常量({book_name})不一致")
+        if renumbered:
+            print(f"[WARN] {book_name}: 章节编号存在缺失/错误，已按文档顺序重新编号")
         out = OUTPUT_DIR / f"{book_name}.json"
         out.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
         total = sum(len(v["chapters"]) for v in data["volumes"])

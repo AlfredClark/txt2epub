@@ -136,6 +136,8 @@ uv run python scrcpts/novel/04_build_epub.py
   - `chinese_lower`：小写中文（一、二、三…）
   - `chinese_upper`：大写中文（壹、贰、叁…）
 - `CHAPTER_TITLE_TEMPLATE` / `VOLUME_TITLE_TEMPLATE`：标题前缀模板，`{number}` 为格式化编号、`{title}` 为原标题
+- `RENUMBER_CHAPTERS`：章节序号缺失/错误时自动按文档顺序重新编号（不使用源文件的错误编号）。按需开启（关闭时保持源编号）
+- `VOLUME_RESTART_CHAPTERS`：分卷是否重新章节计数（`True` 每卷从第 1 章重新开始；`False` 全书连续编号）。仅在 `RENUMBER_CHAPTERS=True` 时生效。默认 `False`
 - `SHOW_INDEX`：是否在书中显示目录页。默认 `True`（封面、扉页后显示完整目录）；设为 `False` 可从阅读顺序（spine）中移除目录页，避免长目录影响翻页体验，但仍保留 EPUB 标准 nav 目录文档，阅读器目录解析跳转不受影响
 
 ## 中间 JSON 结构（`temps/novel/书名.json`）

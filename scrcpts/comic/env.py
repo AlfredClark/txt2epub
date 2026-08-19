@@ -35,11 +35,11 @@ IMAGE_MEDIA_TYPES = {
 # cover: 可选，书名目录内的封面文件名（如 "001.jpg"）；缺省自动探测 cover.*
 COMICS = [
     {
-        "name": "书名示例",
-        "author": "作者示例",
-        "tags": ["标签一", "标签二"],
-        "description": ["简介第一行", "简介第二行"],
-        "cover": "",
+        "name": "遠い君に、僕は届かない",
+        "author": "二峰跨人",
+        "tags": ["NTR", "调教", "凌辱", "无修正"],
+        "description": ["遠い君に、僕は届かない"],
+        "cover": "0000.png",
     },
 ]
 
