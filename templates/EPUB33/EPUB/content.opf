@@ -16,7 +16,7 @@
     <meta refines="#contributor" property="role" scheme="marc:relators">edt</meta>
 
     <dc:description>{{BOOK_DESCRIPTION}}</dc:description>
-    <dc:subject>{{BOOK_SUBJECT}}</dc:subject>
+{{BOOK_SUBJECTS}}
 
     <meta property="schema:accessMode">textual</meta>
     <meta property="schema:accessMode">visual</meta>

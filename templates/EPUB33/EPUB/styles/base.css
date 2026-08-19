@@ -77,3 +77,32 @@ body.volume-page {
   vertical-align: middle;
   text-align: center;
 }
+
+/* 章节正文：中文段首缩进两字符，行距 1.8 */
+.chapter {
+  line-height: 1.75;
+}
+
+.chapter p {
+  text-indent: 2em;
+  margin: 0.5em 0;
+}
+
+.chapter-title {
+  text-align: center;
+  font-size: 1.25em;
+  margin: 1em 0 1.5em;
+}
+
+/* 扉页/卷页标题字号统一（避免不同阅读器默认尺寸差异） */
+.book-title {
+  font-size: 2em;
+}
+
+.book-author {
+  font-size: 1.25em;
+}
+
+.volume-title {
+  font-size: 1.5em;
+}

@@ -214,7 +214,7 @@ def build_book(book_name: str) -> None:
             + "".join(f'<span class="desc-line">{escape(line)}</span>' for line in data["description"])
             + "</p>"
         ),
-        "BOOK_SUBJECT": "/".join(escape(tag) for tag in data["tags"]),
+        "BOOK_SUBJECTS": "\n".join(f"    <dc:subject>{escape(tag)}</dc:subject>" for tag in data["tags"]),
         "COVER_FILE": cover_file,
         "COVER_MEDIA_TYPE": cover_media_type,
     }
@@ -262,12 +262,15 @@ def build_book(book_name: str) -> None:
     toc_list, landmarks = build_nav(
         volumes, chapter_hrefs, pad_width, vol_pad_width, volume_hrefs if multi_volume else None
     )
+    landmark_items = '      <li><a epub:type="cover" href="cover.xhtml">封面</a></li>'
+    if SHOW_INDEX:
+        landmark_items += '\n      <li><a epub:type="toc" href="nav.xhtml#toc">目录</a></li>'
+    landmark_items += f"\n{landmarks}"
     nav_html = render_text(
         nav_template,
         {
             "CHAPTER_TOC_LIST": toc_list,
-            "CHAPTER_LANDMARKS_LIST": landmarks,
-            "INDEX_LANDMARK": '\n      <li><a epub:type="toc" href="nav.xhtml#toc">目录</a></li>' if SHOW_INDEX else "",
+            "LANDMARKS_LIST": landmark_items,
         },
     )
     (build_dir / "EPUB" / "nav.xhtml").write_text(nav_html, encoding="utf-8")
