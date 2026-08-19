@@ -25,6 +25,7 @@ from env import (
     COVER_EXTENSIONS,
     COVER_MEDIA_TYPES,
     OUTPUT_DIR,
+    SHOW_INDEX,
     SOURCE_DIR,
     TEMPLATE_DIR,
     VOLUME_NUMBER_FORMAT,
@@ -137,6 +138,7 @@ def build_opf(
     manifest_entries: list[tuple[str, str]],
     spine_ids: list[str],
     has_cover: bool,
+    show_index: bool,
 ) -> str:
     manifest_items = "\n".join(
         f'    <item id="{cid}" href="text/{href}" media-type="application/xhtml+xml"/>'
@@ -144,27 +146,30 @@ def build_opf(
     )
     spine_items = "\n".join(f'    <itemref idref="{cid}"/>' for cid in spine_ids)
 
-    rendered = render_text(template, values)
-    if not has_cover:
-        rendered = rendered.replace(
-            '    <item id="cover-image" href="images/{{COVER_FILE}}" media-type="{{COVER_MEDIA_TYPE}}" properties="cover-image"/>\n',
-            "",
-        )
-    rendered = rendered.replace(
-        '    <item id="chapter-template" href="text/chapter-template.xhtml" media-type="application/xhtml+xml"/>',
-        manifest_items,
+    rendered = render_text(
+        template,
+        {
+            **values,
+            "MANIFEST_ITEMS": manifest_items,
+            "SPINE_ITEMS": spine_items,
+            "NAV_ITEMREF": '    <itemref idref="nav"/>' if show_index else "",
+            "COVER_ITEM": (
+                f'    <item id="cover-image" href="images/{values["COVER_FILE"]}" media-type="{values["COVER_MEDIA_TYPE"]}" properties="cover-image"/>'
+                if has_cover
+                else ""
+            ),
+        },
     )
-    rendered = rendered.replace('    <itemref idref="chapter-template"/>', spine_items)
     return rendered
 
 
 def build_cover(template: str, values: dict, has_cover: bool) -> str:
-    if has_cover:
-        return render_text(template, values)
-    return render_text(template, values).replace(
-        '    <img src="images/{{COVER_FILE}}" alt="{{BOOK_TITLE}}"/>',
-        f'    <p class="book-title">{escape(values["BOOK_TITLE"])}</p>',
+    cover_block = (
+        f'    <img src="images/{values["COVER_FILE"]}" alt="{values["BOOK_TITLE"]}"/>'
+        if has_cover
+        else f'    <p class="book-title">{values["BOOK_TITLE"]}</p>'
     )
+    return render_text(template, {**values, "COVER_BLOCK": cover_block})
 
 
 def build_book(book_name: str) -> None:
@@ -203,8 +208,13 @@ def build_book(book_name: str) -> None:
         "BOOK_MODIFIED": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "BOOK_TITLE": escape(data["title"]),
         "BOOK_AUTHOR": escape(data["author"]),
-        "BOOK_DESCRIPTION": escape(" ".join(data["description"])),
-        "BOOK_SUBJECT": escape(" ".join(data["tags"])),
+        "BOOK_DESCRIPTION": "&#10;".join(escape(line) for line in data["description"]),
+        "BOOK_DESCRIPTION_BLOCK": (
+            f'    <p class="book-description">'
+            + "".join(f'<span class="desc-line">{escape(line)}</span>' for line in data["description"])
+            + "</p>"
+        ),
+        "BOOK_SUBJECT": "/".join(escape(tag) for tag in data["tags"]),
         "COVER_FILE": cover_file,
         "COVER_MEDIA_TYPE": cover_media_type,
     }
@@ -252,7 +262,14 @@ def build_book(book_name: str) -> None:
     toc_list, landmarks = build_nav(
         volumes, chapter_hrefs, pad_width, vol_pad_width, volume_hrefs if multi_volume else None
     )
-    nav_html = render_text(nav_template, {"CHAPTER_TOC_LIST": toc_list, "CHAPTER_LANDMARKS_LIST": landmarks})
+    nav_html = render_text(
+        nav_template,
+        {
+            "CHAPTER_TOC_LIST": toc_list,
+            "CHAPTER_LANDMARKS_LIST": landmarks,
+            "INDEX_LANDMARK": '\n      <li><a epub:type="toc" href="nav.xhtml#toc">目录</a></li>' if SHOW_INDEX else "",
+        },
+    )
     (build_dir / "EPUB" / "nav.xhtml").write_text(nav_html, encoding="utf-8")
 
     cover_template = (TEMPLATE_DIR / "EPUB" / "cover.xhtml").read_text(encoding="utf-8")
@@ -264,7 +281,7 @@ def build_book(book_name: str) -> None:
     (build_dir / "EPUB" / "titlepage.xhtml").write_text(titlepage_html, encoding="utf-8")
 
     opf_template = (TEMPLATE_DIR / "EPUB" / "content.opf").read_text(encoding="utf-8")
-    opf = build_opf(opf_template, values, manifest_entries, spine_ids, has_cover)
+    opf = build_opf(opf_template, values, manifest_entries, spine_ids, has_cover, SHOW_INDEX)
     (build_dir / "EPUB" / "content.opf").write_text(opf, encoding="utf-8")
 
     total = len(flat_chapter_hrefs)

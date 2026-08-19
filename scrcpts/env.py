@@ -54,3 +54,7 @@ VOLUME_TITLE_TEMPLATE = "第{number}卷 {title}"
 CHAPTER_NUMBER_FORMAT = "arabic_padded"
 # 章节标题前缀模板（{number}=格式化编号, {title}=原标题）
 CHAPTER_TITLE_TEMPLATE = "第{number}章 {title}"
+
+# 是否在书中显示目录页（False 时仅从 spine 移除目录页，仍保留 EPUB 标准 nav
+# 目录文档，阅读器目录解析跳转不受影响）
+SHOW_INDEX = False

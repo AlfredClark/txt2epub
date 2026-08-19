@@ -29,16 +29,16 @@
   </metadata>
   <manifest>
     <item id="base-css" href="styles/base.css" media-type="text/css"/>
-    <item id="cover-image" href="images/{{COVER_FILE}}" media-type="{{COVER_MEDIA_TYPE}}" properties="cover-image"/>
+{{COVER_ITEM}}
     <item id="cover-page" href="cover.xhtml" media-type="application/xhtml+xml"/>
     <item id="titlepage" href="titlepage.xhtml" media-type="application/xhtml+xml"/>
     <item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>
-    <item id="chapter-template" href="text/chapter-template.xhtml" media-type="application/xhtml+xml"/>
+{{MANIFEST_ITEMS}}
   </manifest>
   <spine>
     <itemref idref="cover-page"/>
     <itemref idref="titlepage"/>
-    <itemref idref="nav"/>
-    <itemref idref="chapter-template"/>
+{{NAV_ITEMREF}}
+{{SPINE_ITEMS}}
   </spine>
 </package>
