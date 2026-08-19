@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package xmlns="http://www.idpf.org/2007/opf"
+         xmlns:dc="http://purl.org/dc/elements/1.1/"
+         version="3.0"
+         unique-identifier="book-id"
+         xml:lang="zh-CN">
+  <metadata>
+    <dc:identifier id="book-id">urn:uuid:{{BOOK_UUID}}</dc:identifier>
+    <dc:title>{{BOOK_TITLE}}</dc:title>
+    <dc:language>zh-CN</dc:language>
+    <meta property="dcterms:modified">{{BOOK_MODIFIED}}</meta>
+
+    <dc:creator id="creator">{{BOOK_AUTHOR}}</dc:creator>
+    <meta refines="#creator" property="role" scheme="marc:relators">aut</meta>
+    <dc:contributor id="contributor">Alfred Clark</dc:contributor>
+    <meta refines="#contributor" property="role" scheme="marc:relators">edt</meta>
+
+    <dc:description>{{BOOK_DESCRIPTION}}</dc:description>
+    <dc:subject>{{BOOK_SUBJECT}}</dc:subject>
+
+    <meta property="schema:accessMode">textual</meta>
+    <meta property="schema:accessMode">visual</meta>
+    <meta property="schema:accessModeSufficient">textual</meta>
+    <meta property="schema:accessModeSufficient">textual,visual</meta>
+    <meta property="schema:accessibilityFeature">structuralNavigation</meta>
+    <meta property="schema:accessibilityFeature">tableOfContents</meta>
+    <meta property="schema:accessibilityHazard">none</meta>
+    <meta property="schema:accessibilitySummary">本书为纯文字出版物，正文以标准段落结构排版，无任何无障碍风险。</meta>
+  </metadata>
+  <manifest>
+    <item id="base-css" href="styles/base.css" media-type="text/css"/>
+    <item id="cover-image" href="images/{{COVER_FILE}}" media-type="{{COVER_MEDIA_TYPE}}" properties="cover-image"/>
+    <item id="cover-page" href="cover.xhtml" media-type="application/xhtml+xml"/>
+    <item id="titlepage" href="titlepage.xhtml" media-type="application/xhtml+xml"/>
+    <item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>
+    <item id="chapter-template" href="text/chapter-template.xhtml" media-type="application/xhtml+xml"/>
+  </manifest>
+  <spine>
+    <itemref idref="cover-page"/>
+    <itemref idref="titlepage"/>
+    <itemref idref="nav"/>
+    <itemref idref="chapter-template"/>
+  </spine>
+</package>
