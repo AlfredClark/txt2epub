@@ -34,6 +34,7 @@ from env import (
 )
 
 PLACEHOLDER_RE = re.compile(r"\{\{[A-Z_]+}}")
+PLACEHOLDER_ONLY_LINE_RE = re.compile(r"^\s*(?:\{\{[A-Z_]+}}\s*)+$")
 
 
 def _format_number(order: int, pad_width: int, fmt: str) -> str:
@@ -64,13 +65,23 @@ def volume_title(order: int, title: str, pad_width: int) -> str:
     return VOLUME_TITLE_TEMPLATE.format(number=format_volume_number(order, pad_width), title=title)
 
 
-def render_text(template: str, values: dict[str, str]) -> str:
+def _render_line(line: str, values: dict[str, str]) -> str:
     def replace(match: re.Match) -> str:
         key = match.group(0)[2:-2]
         value = values.get(key)
         return value if value is not None else match.group(0)
 
-    return PLACEHOLDER_RE.sub(replace, template)
+    return PLACEHOLDER_RE.sub(replace, line)
+
+
+def render_text(template: str, values: dict[str, str]) -> str:
+    out: list[str] = []
+    for line in template.splitlines(keepends=True):
+        rendered = _render_line(line, values)
+        if rendered.strip() == "" and PLACEHOLDER_ONLY_LINE_RE.match(line):
+            continue
+        out.append(rendered)
+    return "".join(out)
 
 
 def find_cover(book_name: str) -> tuple[str, str, Path] | None:
@@ -94,6 +105,10 @@ def volume_file_name(volume_order: int) -> str:
 def build_chapter_xhtml(template: str, title: str, contents: list[str]) -> str:
     body = "\n".join(f"    <p>{escape(para)}</p>" for para in contents)
     return render_text(template, {"CHAPTER_TITLE": escape(title), "CHAPTER_BODY": body})
+
+
+def build_volume_intro(intro: list[str]) -> str:
+    return "\n".join(f"    <p class=\"volume-intro\">{escape(line)}</p>" for line in intro)
 
 
 def build_nav(
@@ -242,7 +257,10 @@ def build_book(book_name: str) -> None:
             vid = f"vol{volume['order']:03d}"
             volume_hrefs.append(vhref)
             vtitle = volume_title(volume["order"], volume["title"], vol_pad_width)
-            vxhtml = render_text(volume_template, {"VOLUME_TITLE": escape(vtitle)})
+            vxhtml = render_text(
+                volume_template,
+                {"VOLUME_TITLE": escape(vtitle), "VOLUME_INTRO": build_volume_intro(volume.get("intro", []))},
+            )
             (build_dir / "EPUB" / "text" / vhref).write_text(vxhtml, encoding="utf-8")
             manifest_entries.append((vid, vhref))
             spine_ids.append(vid)

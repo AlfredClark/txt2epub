@@ -34,6 +34,19 @@ def clean_book(data: dict) -> tuple[int, int, list[str], list[tuple[str, str]]]:
     removed_list: list[str] = []
     stripped_list: list[tuple[str, str]] = []
     for volume in data.get("volumes", []):
+        cleaned_intro: list[str] = []
+        for para in volume.get("intro", []):
+            result = clean_paragraph(para)
+            if result is None:
+                removed_count += 1
+                removed_list.append(para)
+                continue
+            cleaned_intro.append(result)
+            if result != para:
+                stripped_count += 1
+                stripped_list.append((para, result))
+        if "intro" in volume:
+            volume["intro"] = cleaned_intro
         for chapter in volume.get("chapters", []):
             cleaned: list[str] = []
             for para in chapter["contents"]:

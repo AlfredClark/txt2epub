@@ -106,3 +106,10 @@ body.volume-page {
 .volume-title {
   font-size: 1.5em;
 }
+
+/* 卷首简介：卷页为居中布局，简介内容靠左 */
+.volume-intro {
+  text-align: left;
+  text-indent: 2em;
+  margin: 0.5em 0;
+}

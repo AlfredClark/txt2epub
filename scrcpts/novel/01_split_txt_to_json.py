@@ -114,21 +114,26 @@ def parse_txt(path: Path) -> tuple[dict, bool]:
             current_volume = {
                 "order": extract_volume_order(line),
                 "title": extract_volume_title(line),
+                "intro": [],
                 "chapters": [],
             }
         elif CHAPTER_RE.match(line):
             flush_chapter()
             if current_volume is None:
-                current_volume = {"order": 0, "title": book_name, "chapters": []}
+                current_volume = {"order": 0, "title": book_name, "intro": [], "chapters": []}
             current_chapter = {"order": extract_order(line), "title": extract_title(line), "contents": []}
         elif current_chapter is not None:
             stripped = line.strip()
             if stripped:
                 current_chapter["contents"].append(stripped)
+        elif current_volume is not None:
+            stripped = line.strip()
+            if stripped:
+                current_volume["intro"].append(stripped)
     flush_volume()
 
     if not volumes and body_lines:
-        volumes.append({"order": 0, "title": book_name, "chapters": []})
+        volumes.append({"order": 0, "title": book_name, "intro": [], "chapters": []})
 
     volumes.sort(key=lambda vol: vol["order"])
 
